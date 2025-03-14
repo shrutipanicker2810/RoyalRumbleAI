@@ -1,0 +1,91 @@
+<agentbody>
+  <default>
+    <geom conaffinity="1" condim="3" density="5.0" friction="1 0.5 0.5" margin="0.01" rgba="0.8 0.6 0.4 1" material="geom"/>
+    <motor ctrllimited="true" ctrlrange="-1. 1."/>
+  </default>
+  <body name="torso" pos="0 0 1.0">
+    <geom name="torso_geom" pos="0 0 0" size="0.2 0.4" type="capsule"/>
+    <joint armature="0" damping="0" limited="false" margin="0.01" name="root" pos="0 0 0" type="free"/>
+
+    <!-- Head -->
+    <body name="head" pos="0 0 0.5">
+      <geom name="head_geom" size="0.15" type="sphere"/>
+      <joint axis="0 0 1" name="neck" pos="0 0 0" range="-45 45" type="hinge"/>
+    </body>
+
+    <!-- Left Arm -->
+    <body name="left_arm" pos="-0.25 0 0.3">
+      <geom fromto="0.0 0.0 0.0 -0.3 0.0 0.0" name="left_upper_arm_geom" size="0.06" type="capsule"/>
+      <joint axis="0 1 0" name="shoulder_left" pos="0.0 0.0 0.0" range="-90 90" type="hinge"/>
+      <body name="left_forearm" pos="-0.3 0 0">
+        <joint axis="0 1 0" name="elbow_left" pos="0.0 0.0 0.0" range="0 130" type="hinge"/>
+        <geom fromto="0.0 0.0 0.0 -0.3 0.0 0.0" name="left_forearm_geom" size="0.06" type="capsule"/>
+      </body>
+    </body>
+
+    <!-- Right Arm -->
+    <body name="right_arm" pos="0.25 0 0.3">
+      <geom fromto="0.0 0.0 0.0 0.3 0.0 0.0" name="right_upper_arm_geom" size="0.06" type="capsule"/>
+      <joint axis="0 1 0" name="shoulder_right" pos="0.0 0.0 0.0" range="-90 90" type="hinge"/>
+      <body name="right_forearm" pos="0.3 0 0">
+        <joint axis="0 1 0" name="elbow_right" pos="0.0 0.0 0.0" range="0 130" type="hinge"/>
+        <geom fromto="0.0 0.0 0.0 0.3 0.0 0.0" name="right_forearm_geom" size="0.06" type="capsule"/>
+      </body>
+    </body>
+
+    <!-- Left Leg -->
+    <body name="left_leg" pos="-0.15 0 -0.4">
+      <geom fromto="0.0 0.0 0.0 0.0 0.0 -0.4" name="left_upper_leg_geom" size="0.08" type="capsule"/>
+      <joint axis="0 0 1" name="hip_left" pos="0.0 0.0 0.0" range="-45 45" type="hinge"/>
+      <body name="left_lower_leg" pos="0 0 -0.4">
+        <joint axis="1 0 0" name="knee_left" pos="0.0 0.0 0.0" range="-120 0" type="hinge"/>
+        <geom fromto="0.0 0.0 0.0 0.0 0.0 -0.4" name="left_lower_leg_geom" size="0.08" type="capsule"/>
+      </body>
+    </body>
+
+    <!-- Right Leg -->
+    <body name="right_leg" pos="0.15 0 -0.4">
+      <geom fromto="0.0 0.0 0.0 0.0 0.0 -0.4" name="right_upper_leg_geom" size="0.08" type="capsule"/>
+      <joint axis="0 0 1" name="hip_right" pos="0.0 0.0 0.0" range="-45 45" type="hinge"/>
+      <body name="right_lower_leg" pos="0 0 -0.4">
+        <joint axis="1 0 0" name="knee_right" pos="0.0 0.0 0.0" range="-120 0" type="hinge"/>
+        <geom fromto="0.0 0.0 0.0 0.0 0.0 -0.4" name="right_lower_leg_geom" size="0.08" type="capsule"/>
+      </body>
+    </body>
+  </body>
+
+  <actuator>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="neck" gear="100"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="shoulder_left" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="elbow_left" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="shoulder_right" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="elbow_right" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="hip_left" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="knee_left" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="hip_right" gear="150"/>
+    <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="knee_right" gear="150"/>
+  </actuator>
+
+  <sensor>
+    <!-- Positions -->
+    <jointpos name="pos_neck" joint="neck"/>
+    <jointpos name="pos_shoulder_left" joint="shoulder_left"/>
+    <jointpos name="pos_elbow_left" joint="elbow_left"/>
+    <jointpos name="pos_shoulder_right" joint="shoulder_right"/>
+    <jointpos name="pos_elbow_right" joint="elbow_right"/>
+    <jointpos name="pos_hip_left" joint="hip_left"/>
+    <jointpos name="pos_knee_left" joint="knee_left"/>
+    <jointpos name="pos_hip_right" joint="hip_right"/>
+    <jointpos name="pos_knee_right" joint="knee_right"/>
+    <!-- Velocities -->
+    <jointvel name="vel_neck" joint="neck"/>
+    <jointvel name="vel_shoulder_left" joint="shoulder_left"/>
+    <jointvel name="vel_elbow_left" joint="elbow_left"/>
+    <jointvel name="vel_shoulder_right" joint="shoulder_right"/>
+    <jointvel name="vel_elbow_right" joint="elbow_right"/>
+    <jointvel name="vel_hip_left" joint="hip_left"/>
+    <jointvel name="vel_knee_left" joint="knee_left"/>
+    <jointvel name="vel_hip_right" joint="hip_right"/>
+    <jointvel name="vel_knee_right" joint="knee_right"/>
+  </sensor>
+</agentbody>
