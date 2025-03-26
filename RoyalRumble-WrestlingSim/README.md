@@ -52,10 +52,12 @@ echo 'export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk "{print \$2}
 source ~/.bashrc
 
 echo $DISPLAY
+```
 
-#If the 'DISPLAY' variable does not return a MAC-address, then we can replace it with Windows IP 
+If the 'DISPLAY' variable does not return a MAC-address, then we can replace it with Windows IP 
 - ipconfig (in Powershell)
 
+```bash
 export DISPLAY= Windows IP  # replace Windows IP here
 
 sed -i '/export DISPLAY=/d' ~/.bashrc
@@ -84,5 +86,5 @@ print('GLFW test passed!')
 "
 ```
 
-## Run "run_match.py" for a match between 2 players only and "run_battle_royale.py" for a complete match season with all players.
+Run "run_match.py" for a match between 2 players only and "run_battle_royale.py" for a complete match season with all players.
 
