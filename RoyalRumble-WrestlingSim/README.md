@@ -1,16 +1,23 @@
-# RoyalRumbleAI - Wresting Simulation
-We are creating an autonomous wrestling simulation, inspired by WWE's Royal Rumble.
+# 🤼‍♂️ RoyalRumbleAI - Wrestling Simulation
 
-## Instructions to set-up environment (conda is preferred) and install required libraries
+We are building an **autonomous wrestling simulation**, inspired by WWE's iconic **Royal Rumble**! This AI-driven project simulates wrestlers competing in real-time using reinforcement learning and physics-based environments.
 
-python version = 3.9.21
+---
 
-## Python Libraries Required: 
-- mujoco==3.1.6
-- pandas
-- numpy
-- gym
-- glfw
+## 🛠 Environment Setup Instructions
+
+> ⚙️ **Recommended Python version:** `3.9.21`  
+> 🐍 **Preferred Environment Manager:** `conda`
+
+---
+
+## 📦 Python Libraries Required
+
+Install the following libraries:
+
+```bash
+pip install mujoco==3.1.6 pandas numpy gym glfw
+
 
 ## Install Required Linux Packages (OpenGL Support) for Simulation
 '''
