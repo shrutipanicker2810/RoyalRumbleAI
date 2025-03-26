@@ -6,17 +6,19 @@ We are creating an autonomous wrestling simulation, inspired by WWE's Royal Rumb
 python version = 3.9.21
 
 ## Python Libraries Required: 
-mujoco==3.1.6
-pandas
-numpy
-gym
-glfw
+- mujoco==3.1.6
+- pandas
+- numpy
+- gym
+- glfw
 
 ## Install Required Linux Packages (OpenGL Support) for Simulation
+'''
 sudo apt update
 sudo apt install -y libgl1-mesa-glx libgl1-mesa-dri libglapi-mesa mesa-utils
 sudo add-apt-repository universe
 sudo apt install -y mesa-utils mesa-utils-bin
+'''
 
 ### Test OpenGL
 glxinfo | grep "OpenGL version"
