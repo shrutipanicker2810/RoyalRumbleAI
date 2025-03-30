@@ -118,6 +118,10 @@ class WrestlingEnv(EzPickle):
         # Initialize renderer
         self.window = None
         self.context = None
+        self.cam = None
+        self.vopt = None
+        self.pert = None
+        self.scn = None
 
     def get_obs_size(self):
         return 3 + 3 + 9 + 9 + 3
@@ -216,29 +220,64 @@ class WrestlingEnv(EzPickle):
         return self._get_obs()
 
     def render(self, mode="human"):
-            if not glfw.init():
-                raise RuntimeError("Failed to initialize GLFW")
+        if not glfw.init():
+            raise RuntimeError("Failed to initialize GLFW")
 
-            if self.window is None:
-                self.window = glfw.create_window(800, 600, "Wrestling Simulation", None, None)
-                if not self.window:
-                    glfw.terminate()
-                    raise RuntimeError("Failed to create GLFW window")
-                glfw.make_context_current(self.window)
-                self.context = mujoco.MjrContext(self.model, mujoco.mjtFontScale.mjFONTSCALE_150)
-                self.cam = mujoco.MjvCamera()
-                self.cam.distance = 5.0
-                self.cam.azimuth = 90
-                self.cam.elevation = -20
-                self.vopt = mujoco.MjvOption()
-                self.pert = mujoco.MjvPerturb()
-                self.scn = mujoco.MjvScene(self.model, maxgeom=10000)
+        if self.window is None:
+            self.window = glfw.create_window(800, 600, "Wrestling Simulation", None, None)
+            if not self.window:
+                glfw.terminate()
+                raise RuntimeError("Failed to create GLFW window")
+            glfw.make_context_current(self.window)
+            self.context = mujoco.MjrContext(self.model, mujoco.mjtFontScale.mjFONTSCALE_150)
+            self.cam = mujoco.MjvCamera()
+            self.cam.distance = 5.0
+            self.cam.azimuth = 90
+            self.cam.elevation = -20
+            self.vopt = mujoco.MjvOption()
+            self.pert = mujoco.MjvPerturb()
+            self.scn = mujoco.MjvScene(self.model, maxgeom=10000)
 
-            mujoco.mjv_updateScene(self.model, self.data, self.vopt, self.pert, self.cam, mujoco.mjtCatBit.mjCAT_ALL, self.scn)
-            viewport = mujoco.MjrRect(0, 0, 800, 600)
-            mujoco.mjr_render(viewport, self.scn, self.context)
-            glfw.swap_buffers(self.window)
-            glfw.poll_events()
+        # Update the scene
+        mujoco.mjv_updateScene(self.model, self.data, self.vopt, self.pert, self.cam, mujoco.mjtCatBit.mjCAT_ALL, self.scn)
+
+        # Define the viewport
+        viewport = mujoco.MjrRect(0, 0, 800, 600)
+
+        # Render the scene
+        mujoco.mjr_render(viewport, self.scn, self.context)
+
+        # Add text overlay for match logs using mjr_overlay
+        if len(self.wrestlers) == 2:
+            wrestler1, wrestler2 = self.wrestlers
+            # Prepare the text to display
+            text_lines = [
+                f"{wrestler1.name} vs {wrestler2.name}",
+                f"{wrestler1.name}: Health: {wrestler1.health:.1f}, Stamina: {wrestler1.stamina:.1f}",
+                f"{wrestler2.name}: Health: {wrestler2.health:.1f}, Stamina: {wrestler2.stamina:.1f}"
+            ]
+
+            # Draw each line of text, adjusting the viewport's bottom position
+            base_viewport = mujoco.MjrRect(0, 0, 800, 600)  # Create a copy of the viewport
+            for i, line in enumerate(text_lines):
+                adjusted_viewport = mujoco.MjrRect(
+                    base_viewport.left,
+                    base_viewport.bottom + i * 30,  # Shift the bottom edge up for each line
+                    base_viewport.width,
+                    base_viewport.height
+                )
+                mujoco.mjr_overlay(
+                    mujoco.mjtFont.mjFONT_NORMAL,      # Font to use
+                    mujoco.mjtGridPos.mjGRID_BOTTOMLEFT,  # Position (bottom-left corner)
+                    adjusted_viewport,                 
+                    line.encode('utf-8'),              
+                    None,                              
+                    self.context                       
+                )
+
+        # Swap buffers and poll events
+        glfw.swap_buffers(self.window)
+        glfw.poll_events()
 
     def close(self):
         if self.window is not None:
