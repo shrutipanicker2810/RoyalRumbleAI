@@ -1,0 +1,26 @@
+<!--
+Purpose: Defines the wrestling ring environment.
+What Happens:
+Adapts RoboSumo’s arena into a wrestling mat or ring with boundaries.
+Sets up collision detection for wrestler interactions.
+Example: <geom type="plane" size="5 5 0.1"/> for the mat.
+-->
+
+<mujoco model="wrestling_ring">
+  <compiler angle="degree"/>  
+  <option timestep="0.01" gravity="0 0 -9.81"/>
+  <size nconmax="200"/>
+  <default>
+    <geom contype="1" conaffinity="1" rgba="0.7 0.7 0.7 1"/>
+  </default>
+  <asset>
+    <material name="mat" rgba="0.7 0.7 0.7 1"/>
+  </asset>
+  <worldbody>
+    <geom name="ring" type="plane" size="2.5 2.5 0.1" material="mat"/>
+    <geom name="topborder" type="capsule" fromto="-2.0 2.0 0.5 2.0 2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
+    <geom name="rightborder" type="capsule" fromto="2.0 -2.0 0.5 2.0 2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
+    <geom name="bottomborder" type="capsule" fromto="-2.0 -2.0 0.5 2.0 -2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
+    <geom name="leftborder" type="capsule" fromto="-2.0 -2.0 0.5 -2.0 2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
+  </worldbody>
+</mujoco>
