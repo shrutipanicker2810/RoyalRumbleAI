@@ -41,7 +41,11 @@ class Coach:
             genes[0] = max(0.0, genes[0] - 0.1)
             genes[1] = max(0.0, genes[1] - 0.1)
             genes[2] = min(1.0, genes[2] + 0.2)  # Boost defensiveness
-        # Balanced leaves genes unchanged
+        elif strategy == "balanced":
+            # Move genes toward a balanced value (e.g., 0.5)
+            genes[0] = genes[0] + (0.5 - genes[0]) * 0.3  # Adjust strength toward 0.5
+            genes[1] = genes[1] + (0.5 - genes[1]) * 0.3  # Adjust agility toward 0.5
+            genes[2] = genes[2] + (0.5 - genes[2]) * 0.3  # Adjust defensiveness toward 0.5
         return genes
 
     def simulated_annealing(self, max_iterations=100):
