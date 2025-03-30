@@ -60,6 +60,22 @@ class Evolution:
                 next_gen.append(new_wrestler)
 
             self.wrestlers = next_gen
+
+            # Run matches to update fitness, with health reset and output suppressed
+            for i in range(0, len(self.wrestlers), 2):
+                if i + 1 < len(self.wrestlers):
+                    w1, w2 = self.wrestlers[i], self.wrestlers[i + 1]
+                    # Reset health and stamina
+                    w1.health = w1.max_health
+                    w2.health = w2.max_health
+                    w1.stamina = 100
+                    w2.stamina = 100
+                    final_state = run_match(w1, w2, self.env, render=False, verbose=False)
+                    winner = next(w for w in [w1, w2] if w.name == final_state["winner"])
+                    loser = next(w for w in [w1, w2] if w.name != final_state["winner"])
+                    w1.update_performance(w2.name, final_state["rewards"][0], w1 == winner)
+                    w2.update_performance(w1.name, final_state["rewards"][1], w2 == winner)
+                    
             print(f"Average Fitness: {np.mean([w.fitness for w in self.wrestlers])}")
 
         return self.wrestlers
