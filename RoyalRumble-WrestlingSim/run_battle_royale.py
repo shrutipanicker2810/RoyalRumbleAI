@@ -99,6 +99,34 @@ def run_battle_royale():
     final_winner = current_wrestlers[0]
     print(f"\nBattle Royale Winner: {final_winner.name}!")
     print(f"Elimination Order: {[w.name for w in eliminated_wrestlers]}")
+
+    # Optimize pairings with Coach
+    coach = Coach(wrestlers, env)
+    best_pairing, best_strategies = coach.simulated_annealing()
+    
+    # Evolve wrestlers for next season
+    evolution = Evolution(wrestlers)
+    next_season_wrestlers = evolution.evolve()
+
+    # Run a second match with the best pairing and their optimized strategies
+    print("\nRunning a second match with the optimized pairing and strategies...")
+    # Find the wrestlers in the evolved population (or original if not evolved)
+    wrestler1 = next(w for w in next_season_wrestlers if w.name == best_pairing[0].name)
+    wrestler2 = next(w for w in next_season_wrestlers if w.name == best_pairing[1].name)
+
+    # Apply the strategies to adjust their genes
+    wrestler1.genes = coach.adjust_genes(wrestler1.genes.copy(), best_strategies[0])
+    wrestler2.genes = coach.adjust_genes(wrestler2.genes.copy(), best_strategies[1])
+
+    # Reset their health and stamina for a fresh match
+    wrestler1.health = wrestler1.max_health
+    wrestler2.health = wrestler2.max_health
+    wrestler1.stamina = 100
+    wrestler2.stamina = 100
+
+    # Run the match with rendering enabled
+    run_match(wrestler1, wrestler2, env, render=True)
+    
     env.close()  # Close the viewer when done
     return match_results, wrestlers
 
