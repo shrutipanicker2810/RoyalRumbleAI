@@ -18,6 +18,10 @@ Example: <geom type="plane" size="5 5 0.1"/> for the mat.
   </asset>
   <worldbody>
     <geom name="ring" type="plane" size="2.5 2.5 0.1" material="mat"/>
+    <!--  Red spotlight from the left-front corner  -->
+    <light pos="-2 -2 4" dir="2 2 -4" diffuse="1 0 0"/>
+    <!--  Blue spotlight from the right-back corner  -->
+    <light pos="2 2 4" dir="-2 -2 -4" diffuse="0 0 1"/>
     <geom name="topborder" type="capsule" fromto="-2.0 2.0 0.5 2.0 2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
     <geom name="rightborder" type="capsule" fromto="2.0 -2.0 0.5 2.0 2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
     <geom name="bottomborder" type="capsule" fromto="-2.0 -2.0 0.5 2.0 -2.0 0.5" size="0.1" rgba="0.2 0.2 0.2 1"/>
