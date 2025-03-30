@@ -27,7 +27,7 @@ class Coach:
         wrestler1.genes = w1_genes
         wrestler2.genes = w2_genes
         
-        final_state = run_match(wrestler1, wrestler2, self.env, render=False)
+        final_state = run_match(wrestler1, wrestler2, self.env, render=False, verbose=False)
         fitness = wrestler1.fitness + wrestler2.fitness  # Combined fitness
         return fitness
 

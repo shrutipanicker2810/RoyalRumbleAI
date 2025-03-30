@@ -8,6 +8,7 @@ import numpy as np
 from wrestler import Wrestler
 from env import WrestlingEnv
 import random
+from run_match import run_match 
 
 class Evolution:
     def __init__(self, wrestlers, population_size=30, mutation_rate=0.1, crossover_rate=0.8):
@@ -71,11 +72,17 @@ class Evolution:
                     w1.stamina = 100
                     w2.stamina = 100
                     final_state = run_match(w1, w2, self.env, render=False, verbose=False)
-                    winner = next(w for w in [w1, w2] if w.name == final_state["winner"])
-                    loser = next(w for w in [w1, w2] if w.name != final_state["winner"])
+                    winner_name = final_state.get("winner")
+                    if winner_name is None:
+                        # Fallback: Determine winner based on health
+                        winner = w1 if w1.health >= w2.health else w2
+                        loser = w2 if w1.health >= w2.health else w1
+                    else:
+                        winner = next(w for w in [w1, w2] if w.name == winner_name)
+                        loser = next(w for w in [w1, w2] if w.name != winner_name)
                     w1.update_performance(w2.name, final_state["rewards"][0], w1 == winner)
                     w2.update_performance(w1.name, final_state["rewards"][1], w2 == winner)
-                    
+
             print(f"Average Fitness: {np.mean([w.fitness for w in self.wrestlers])}")
 
         return self.wrestlers

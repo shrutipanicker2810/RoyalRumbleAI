@@ -109,34 +109,38 @@ def run_battle_royale():
     next_season_wrestlers = evolution.evolve()
 
     # Run a second match with the best pairing and their optimized strategies
-    print("\nRunning a second match with the optimized pairing and strategies...")
+    print("\nRunning a baseline match with the selected pairing (no strategies applied)...")
     # Find the wrestlers in the evolved population (or original if not evolved)
-    wrestler1 = next(w for w in next_season_wrestlers if w.name == best_pairing[0].name)
-    wrestler2 = next(w for w in next_season_wrestlers if w.name == best_pairing[1].name)
+    wrestler1 = next(w for w in wrestlers if w.name == best_pairing[0].name)
+    wrestler2 = next(w for w in wrestlers if w.name == best_pairing[1].name)
 
-    # Apply the strategies to adjust their genes
-    wrestler1.genes = coach.adjust_genes(wrestler1.genes.copy(), best_strategies[0])
-    wrestler2.genes = coach.adjust_genes(wrestler2.genes.copy(), best_strategies[1])
-
-    # Reset their health and stamina for a fresh match
+    # Reset health and stamina for a fresh match (no strategy adjustments)
     wrestler1.health = wrestler1.max_health
     wrestler2.health = wrestler2.max_health
     wrestler1.stamina = 100
     wrestler2.stamina = 100
 
+    # Run the baseline match without applying strategies
+    run_match(wrestler1, wrestler2, env, render=True)
+
+    # Now run the match with the optimized strategies
+    print("\nRunning a match with the optimized pairing and strategies...")
+    # Reset health and stamina again for a fresh match
+    wrestler1.health = wrestler1.max_health
+    wrestler2.health = wrestler2.max_health
+    wrestler1.stamina = 100
+    wrestler2.stamina = 100
+
+    # Apply the strategies to adjust their genes
+    wrestler1.genes = coach.adjust_genes(wrestler1.genes.copy(), best_strategies[0])
+    wrestler2.genes = coach.adjust_genes(wrestler2.genes.copy(), best_strategies[1])
+
     # Run the match with rendering enabled
     run_match(wrestler1, wrestler2, env, render=True)
-    
+
     env.close()  # Close the viewer when done
     return match_results, wrestlers
 
 if __name__ == "__main__":
     match_results, wrestlers = run_battle_royale()
 
-    # Optimize pairings with Coach class
-    coach = Coach(wrestlers,WrestlingEnv())
-    best_pairing, best_strategies = coach.simulated_annealing()
-
-    # Evolve wrestlers for next season
-    evolution = Evolution(wrestlers)
-    next_season_wrestlers = evolution.evolve()
