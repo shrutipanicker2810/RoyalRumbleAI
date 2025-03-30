@@ -21,6 +21,7 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
     wrestler2.health = wrestler2.max_health
     wrestler1.stamina = 100
     wrestler2.stamina = 100
+
     try:
         obs = env.reset()
     except Exception as e:
@@ -45,11 +46,20 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
     agent2 = WrestlingAgent(wrestler2)
     action_names = {0: "Punch", 1: "Kick", 2: "Defend", 3: "Signature", 4: "No-op"}
 
+    # Track health changes to prevent long stretches of no change
+    last_health1, last_health2 = wrestler1.health, wrestler2.health
+    unchanged_health_steps = 0
+    max_unchanged_steps = 5
+
     if verbose:
         print(f"\nMatch: {wrestler1.name} (Health: {wrestler1.health}) vs {wrestler2.name} (Health: {wrestler2.health})")
         print("---------------------------------------------")
 
     while not done:
+        # Update agents with the current unchanged health steps
+        agent1.set_unchanged_health_steps(unchanged_health_steps)
+        agent2.set_unchanged_health_steps(unchanged_health_steps)
+        
         action0 = 4 if wrestler1.stunned else agent1.choose_action(obs[0])
         action1 = 4 if wrestler2.stunned else agent2.choose_action(obs[1])
         actions = [action0, action1]
@@ -65,6 +75,19 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
 
         total_rewards = [total_rewards[i] + rewards[i] for i in range(2)]
         timestep += 1
+
+        # Check if health has changed
+        if wrestler1.health == last_health1 and wrestler2.health == last_health2:
+            unchanged_health_steps += 1
+        else:
+            unchanged_health_steps = 0
+        last_health1, last_health2 = wrestler1.health, wrestler2.health
+
+        # End the match if health hasn't changed for too long
+        if unchanged_health_steps >= max_unchanged_steps:
+            if verbose:
+                print(f"Match ended early due to {max_unchanged_steps} timesteps with no health change.")
+            break
 
         if verbose:
             print(f"Timestep {timestep}:")
@@ -105,7 +128,8 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
     final_state = {
         "rewards": total_rewards,
         "health": [wrestler1.health, wrestler2.health],
-        "stamina": [wrestler1.stamina, wrestler2.stamina]
+        "stamina": [wrestler1.stamina, wrestler2.stamina],
+        "winner": winner.name
     }
     return final_state
 
