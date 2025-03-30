@@ -103,4 +103,12 @@ def run_battle_royale():
     return match_results, wrestlers
 
 if __name__ == "__main__":
-    run_battle_royale()
+    match_results, wrestlers = run_battle_royale()
+
+    # Optimize pairings with Coach class
+    coach = Coach(wrestlers,WrestlingEnv())
+    best_pairing, best_strategies = coach.simulated_annealing()
+
+    # Evolve wrestlers for next season
+    evolution = Evolution(wrestlers)
+    next_season_wrestlers = evolution.evolve()
