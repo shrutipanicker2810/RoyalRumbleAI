@@ -59,7 +59,7 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
         # Update agents with the current unchanged health steps
         agent1.set_unchanged_health_steps(unchanged_health_steps)
         agent2.set_unchanged_health_steps(unchanged_health_steps)
-        
+
         action0 = 4 if wrestler1.stunned else agent1.choose_action(obs[0])
         action1 = 4 if wrestler2.stunned else agent2.choose_action(obs[1])
         actions = [action0, action1]
@@ -72,6 +72,10 @@ def run_match(wrestler1, wrestler2, env, render=True, verbose=True):  # Changed 
             print(f"Error in env.step: {e}")
             # Fallback: End the match and determine winner based on current state
             break
+
+        # Reset wrestlers to their initial positions after each move
+        wrestler1.reset(xyz=(-0.5, 0, 1.0))
+        wrestler2.reset(xyz=(0.5, 0, 1.0))
 
         total_rewards = [total_rewards[i] + rewards[i] for i in range(2)]
         timestep += 1
