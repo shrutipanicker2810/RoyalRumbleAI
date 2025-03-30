@@ -4,12 +4,6 @@
 # - Loops through timesteps, calling agent.py for actions and env.py for updates.
 # - Logs results (rewards, winner) for coach.py and evolution.py.
 
-# env = WrestlingEnv()
-# wrestler1, wrestler2 = wrestlers[0], wrestlers[1]
-# while not done:
-#     action = agent.choose_action(obs, wrestler1)
-#     obs, reward, done, _ = env.step(action)
-
 import numpy as np
 from env import WrestlingEnv
 from wrestler import Wrestler
