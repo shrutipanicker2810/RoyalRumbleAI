@@ -50,15 +50,6 @@ class Wrestler:
     def is_eliminated(self):
         return self.health <= 0
 
-    # def _set_joint_indices(self):
-    #     # Compute qpos and ctrl indices based on wrestler ID
-    #     # Each wrestler has 7 DOFs (free joint) + 9 joints = 16 qpos entries
-    #     # Each wrestler has 9 control inputs (motors)
-    #     self.qpos_start_idx = self.id * 16  # 7 (free joint) + 9 (hinges)
-    #     self.qpos_end_idx = self.qpos_start_idx + 16
-    #     self.ctrl_start_idx = self.id * 9  # 9 motors per wrestler
-    #     self.ctrl_end_idx = self.ctrl_start_idx + 9
-
     def _set_joint_indices(self):
         # Use match position (0 or 1) instead of global id
         match_pos = 0 if self.id == self._env.wrestlers[0].id else 1
@@ -83,49 +74,6 @@ class Wrestler:
         opp_pos = opp.get_qpos()[:3]
         return np.concatenate([np.array([self.health, self.stamina, self.last_action or 0]),
                                self_pos, self_joints, opp_pos])
-
-    # def apply_action(self, action):
-    #     ctrl = np.zeros(9)  # 9 motors: neck, shoulder_left, elbow_left, shoulder_right, elbow_right, hip_left, knee_left, hip_right, knee_right
-    #     if action == 0:  # Punch
-    #         ctrl[1] = self.genes[0]  # Shoulder_left
-    #         ctrl[2] = self.genes[0]  # Elbow_left
-    #         self.stamina -= 5
-    #     elif action == 1:  # Kick
-    #         ctrl[5] = self.genes[1]  # Hip_left
-    #         ctrl[6] = self.genes[1]  # Knee_left
-    #         self.stamina -= 7
-    #     elif action == 2:  # Defend
-    #         ctrl[:] = 0.1  # Small resistance
-    #         self.stamina += 2
-    #     elif action == 3:  # Signature (strong punch)
-    #         ctrl[3] = self.genes[0] * 1.5  # Shoulder_right
-    #         ctrl[4] = self.genes[0] * 1.5  # Elbow_right
-    #         self.stamina -= 10
-    #     self.last_action = action
-    #     self._env.data.ctrl[self.ctrl_start_idx:self.ctrl_end_idx] = ctrl
-
-    # def apply_action(self, action):
-    #     ctrl = np.zeros(9)
-    #     if action == 0:  # Punch
-    #         ctrl[1] = self.genes[0]
-    #         ctrl[2] = self.genes[0]
-    #         self.stamina -= 5
-    #     elif action == 1:  # Kick
-    #         ctrl[5] = self.genes[1]
-    #         ctrl[6] = self.genes[1]
-    #         self.stamina -= 7
-    #     elif action == 2:  # Defend
-    #         ctrl[:] = 0.1
-    #         self.stamina += 2
-    #     elif action == 3:  # Signature
-    #         ctrl[3] = self.genes[0] * 1.5
-    #         ctrl[4] = self.genes[0] * 1.5
-    #         self.stamina -= 10
-    #     elif action == 4:  # No-op
-    #         self.stamina += 5  # Recover stamina
-    #     self.last_action = action
-    #     self._env.data.ctrl[self.ctrl_start_idx:self.ctrl_end_idx] = ctrl
-
 
     def apply_action(self, action):
         ctrl = np.zeros(9)
@@ -161,13 +109,6 @@ class Wrestler:
         self.last_action = action
         self._env.data.ctrl[self.ctrl_start_idx:self.ctrl_end_idx] = ctrl
 
-    # def reset(self, xyz):
-    #     self.health = 100
-    #     self.stamina = 100
-    #     self.last_action = None
-    #     self.stunned = False
-    #     self.set_xyz(xyz)
-
     def reset(self, xyz=None):
         # Reset stamina and position, but keep current health
         self.stamina = 100
@@ -196,7 +137,6 @@ class Wrestler:
     # Health Calculation Explanation
     # Equation: Health = 50 + (Weight * 0.5) + (Experience * 1.0) + (Height * 0.1)
     # - Base Health (50): Ensures every wrestler has a minimum capacity.
-    # - Weight * 0.5: Reflects physical durability (e.g., 100 kg adds 50 health).
-    # - Experience * 1.0: Represents resilience from years in the ring (e.g., 90 experience adds 90 health).
-    # - Height * 0.1: Slight bonus for reach/size (e.g., 200 cm adds 20 health).
-    # - Cap at 500: Prevents outliers (e.g., André the Giant) from being invincible.
+    # - Weight * 1.5: Reflects physical durability (e.g., 100 kg adds 50 health).
+    # - Experience * 2: Represents resilience from years in the ring (e.g., 90 experience adds 90 health).
+    # - Height * 0.5: Slight bonus for reach/size (e.g., 200 cm adds 20 health).
