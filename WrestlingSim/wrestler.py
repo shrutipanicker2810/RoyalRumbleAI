@@ -36,15 +36,15 @@ class Wrestler:
 
     def compute_strength(self):
         """Calculate strength score based on attributes and genes."""
-        return self.genes[0] * (self.weight * 0.6 + self.height * 0.3 + self.experience * 0.1)
+        return self.genes[0] * (self.weight * 0.6 + self.height * 0.3 + self.experience * 0.2 + self.popularity * 0.2) 
 
     def compute_stamina(self):
         """Calculate stamina score based on attributes and genes."""
-        return self.genes[1] * (self.experience * 0.5 + self.weight * 0.3 + self.popularity * 0.2)
+        return self.genes[1] * (self.experience * 0.2 + (200 - self.weight) * 0.3 + self.popularity * 0.2)
 
     def compute_defense_rating(self):
         """Calculate defense score based on attributes and genes."""
-        return self.genes[2] * (self.experience * 0.7 + self.height * 0.2 + self.popularity * 0.1)
+        return self.genes[2] * (self.experience * 0.7 + self.height * 0.2)
 
     def apply_action(self, action):
         """Apply the chosen action and update wrestler state.
