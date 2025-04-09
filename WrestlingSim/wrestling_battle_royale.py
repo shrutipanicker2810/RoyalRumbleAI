@@ -316,6 +316,9 @@ def run_battle_royale():
     for i, w in enumerate(env.wrestlers, 1):
         print(f"{i}. {w.name} - Initial Health: {w.health}")
     print("\n")
+
+    # Set all_wrestlers in viz.stats
+    viz.stats["all_wrestlers"] = env.wrestlers
     
     # Create agents for each wrestler
     agents = {w.id: WrestlingAgent(w) for w in env.wrestlers}

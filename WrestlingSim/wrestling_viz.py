@@ -19,12 +19,14 @@ class WrestlingViz:
         # Color definitions
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
-        self.RED = (220, 20, 60)
+        self.RED = (255, 0, 0)
+        self.CRIMSON = (220, 20, 60)
         self.BLUE = (0, 0, 205)
-        self.CYAN = (168, 222, 87)
+        self.CYAN = (0,191,255)
         self.GREEN = (10, 168, 13)
         self.YELLOW = (255, 255, 0)
         self.SKIN_COLOR = (240, 164, 12)
+        self.GREY = (40, 40, 50) #(150, 150, 150)
         
         # Ring dimensions and scaling
         self.ring_size = ring_size
@@ -41,11 +43,11 @@ class WrestlingViz:
         self.initiator = None  # Currently attacking wrestler
         self.responder = None  # Currently defending wrestler
         
-        # Scroll panel variables
-        self.scroll_y = 0  # Current scroll position
-        self.scroll_speed = 20  # Pixels to scroll per mouse wheel event
-        self.panel_width = 300  # Width of stats panel
+        # Panel dimensions
+        self.panel_width = 410  # Width of stats panel
         self.panel_height = screen_height - 20  # Visible panel height
+        self.column_width = (self.panel_width - 30) // 2  # Two columns with padding
+        self.card_height = (self.panel_height - 40) // 5  # # 5 cards per column, accounting for title space
 
     def draw_humanoid(self, wrestler, screen_pos, is_left):
         """Draw a wrestler as a humanoid figure at the given screen position.
@@ -57,7 +59,7 @@ class WrestlingViz:
         """
         # Color wrestler based on role (attacker/defender/neutral)
         if wrestler == self.initiator:
-            color = self.RED
+            color = self.CRIMSON
         elif wrestler == self.responder:
             color = self.BLUE
         else:
@@ -102,13 +104,14 @@ class WrestlingViz:
         pygame.draw.rect(self.screen, self.GREEN if health_ratio > 0.5 else self.YELLOW if health_ratio > 0.25 else self.RED,
                          (screen_pos[0] - bar_width // 2, screen_pos[1] - 40 * player_scale, int(bar_width * health_ratio), bar_height))
         
+        # change tag background color for initiators and responders
         # Draw name tag
         name_font = pygame.font.SysFont("Arial", int(16 * player_scale))
         name_text = name_font.render(wrestler.name, True, self.WHITE)
         name_rect = name_text.get_rect(center=(screen_pos[0], screen_pos[1] - 60 * player_scale))
         background_rect = name_rect.inflate(10 * player_scale, 6 * player_scale)
         pygame.draw.rect(self.screen, (50, 50, 50, 200), background_rect, border_radius=5)
-        pygame.draw.rect(self.screen, self.WHITE, background_rect, 2, border_radius=5)
+        pygame.draw.rect(self.screen, self.CRIMSON if wrestler == self.initiator else self.BLUE if wrestler == self.responder else self.WHITE, background_rect, 2, border_radius=5)
         self.screen.blit(name_text, name_rect)
 
     def draw_attack_limbs(self, wrestler, screen_pos, body_top, body_bottom, action, progress, color, player_scale):
@@ -169,102 +172,101 @@ class WrestlingViz:
             pygame.draw.line(self.screen, rope_colors[i], (self.ring_rect.left, rope_y), (self.ring_rect.right, rope_y), 3)
 
     def draw_stats_panel(self):
-        """Draw the scrollable stats panel showing wrestler status."""
+        """Draw the stats panel with fixed cards for all 10 wrestlers."""
         # Calculate total content height
-        wrestler_card_height = 110
-        eliminated_entry_height = 25
-        content_height = (40 + len(self.stats["current_wrestlers"]) * wrestler_card_height +  # Current wrestlers
-                         (30 + len(self.stats["eliminated"]) * eliminated_entry_height if self.stats["eliminated"] else 0))  # Eliminated section
-
-        # Create surface for entire content (may be larger than visible area)
-        content_surface = pygame.Surface((self.panel_width, max(content_height, self.panel_height)))
-        content_surface.fill((40, 40, 50))  # Dark background
-        
-        # Draw current wrestlers section
-        y_pos = 10
-        title = self.title_font.render("Current Wrestlers", True, self.WHITE)
-        content_surface.blit(title, (10, y_pos))
-        y_pos += 40
-        
-        for wrestler in self.stats["current_wrestlers"]:
-            # Color card based on role (attacker/defender/neutral)
-            card_color = (220, 20, 60) if wrestler == self.initiator else (0, 0, 205) if wrestler == self.responder else (60, 60, 70)
-            pygame.draw.rect(content_surface, card_color, (10, y_pos, self.panel_width-20, 110))
-            
-            # Draw name with outline effect
-            name = self.title_font.render(wrestler.name, True, self.BLACK)
-            content_surface.blit(name, (17, y_pos+7))
-            name = self.title_font.render(wrestler.name, True, self.WHITE)
-            content_surface.blit(name, (15, y_pos+5))
-            
-            # Health display
-            health_ratio = wrestler.health / wrestler.max_health
-            health_text = self.font.render(f"HP: {wrestler.health:.1f}/{wrestler.max_health}", True, self.BLACK)
-            content_surface.blit(health_text, (17, y_pos+32))
-            health_text = self.font.render(f"HP: {wrestler.health:.1f}/{wrestler.max_health}", True, self.WHITE)
-            content_surface.blit(health_text, (15, y_pos+30))
-            
-            # Health bar
-            health_bar_rect = (15, y_pos+50, self.panel_width-40, 10)
-            pygame.draw.rect(content_surface, self.BLACK, health_bar_rect, 3)
-            pygame.draw.rect(content_surface, (100, 100, 100), (15, y_pos+50, self.panel_width-40, 10))
-            pygame.draw.rect(content_surface, self.GREEN, (15, y_pos+50, int((self.panel_width-40)*health_ratio), 10))
-            
-            # Stamina display
-            stamina_ratio = wrestler.stamina / wrestler.max_stamina
-            stamina_text = self.font.render(f"STA: {wrestler.stamina:.0f}/{wrestler.max_stamina}", True, self.BLACK)
-            content_surface.blit(stamina_text, (17, y_pos+72))
-            stamina_text = self.font.render(f"STA: {wrestler.stamina:.0f}/{wrestler.max_stamina}", True, self.WHITE)
-            content_surface.blit(stamina_text, (15, y_pos+70))
-
-            # Stamina bar
-            stamina_bar_rect = (15, y_pos+90, self.panel_width-40, 10)
-            pygame.draw.rect(content_surface, self.BLACK, stamina_bar_rect, 3)
-            pygame.draw.rect(content_surface, (100, 100, 100), (15, y_pos+90, self.panel_width-40, 10))
-            pygame.draw.rect(content_surface, self.CYAN, (15, y_pos+90, int((self.panel_width-40)*stamina_ratio), 10))
-            
-            y_pos += 120
-        
-        # Draw eliminated section if any wrestlers have been eliminated
-        if self.stats["eliminated"]:
-            title = self.title_font.render("Eliminated", True, self.WHITE)
-            content_surface.blit(title, (10, y_pos))
-            y_pos += 30
-            for wrestler in self.stats["eliminated"]:
-                text = self.font.render(wrestler.name, True, (200, 200, 200))
-                content_surface.blit(text, (15, y_pos))
-                y_pos += 25
-
-        # Create visible panel surface
         panel = pygame.Surface((self.panel_width, self.panel_height))
-        panel.fill((40, 40, 50))
+        panel.fill((40, 40, 50))  # Dark background
+        
+        # Draw title
+        title = self.title_font.render("Current Wrestlers", True, self.WHITE)
+        panel.blit(title, (10, 10))
+        y_pos = 40
+        
+        # Ensure we have a list of all wrestlers (set in render)
+        all_wrestlers = self.stats["all_wrestlers"]
+        active_wrestlers = self.stats["current_wrestlers"]
+        eliminated_wrestlers = self.stats["eliminated"]
 
-        # Blit content surface onto panel with scroll offset
-        panel.blit(content_surface, (0, -self.scroll_y))
+        for col in range(2):  # Two columns
+            x_offset = 10 if col == 0 else self.column_width + 20  # Left or right column
+            column_wrestlers = all_wrestlers[col * 5:(col + 1) * 5]  # First 5 or last 5
+            y_pos = 40  # Reset y_pos for each column
 
-        # Draw panel on screen
-        self.screen.blit(panel, (self.screen.get_width() - self.panel_width - 10, 10))
-
-        # Draw scrollbar if content is larger than panel
-        if content_height > self.panel_height:
-            scrollbar_height = max(20, (self.panel_height / content_height) * self.panel_height)
-            scrollbar_pos = (self.panel_height - scrollbar_height) * (self.scroll_y / (content_height - self.panel_height))
-            pygame.draw.rect(self.screen, (150, 150, 150),
-                             (self.screen.get_width() - 20, 10 + scrollbar_pos, 10, scrollbar_height))
-
+            for i, wrestler in enumerate(column_wrestlers):
+                is_active = wrestler in active_wrestlers
+                is_eliminated = wrestler in eliminated_wrestlers
+                is_initiator = wrestler == self.initiator
+                is_responder = wrestler == self.responder
+                
+                # Determine card color and text color
+                if is_initiator:
+                    card_color = self.CRIMSON
+                    text_color = self.WHITE
+                elif is_responder:
+                    card_color = self.BLUE
+                    text_color = self.WHITE
+                elif is_active:
+                    card_color = (60, 60, 70)  # Neutral active color
+                    text_color = self.WHITE
+                else:
+                    card_color = (40, 40, 50)
+                    text_color = self.BLACK  # Inactive (not yet entered or eliminated)
+                
+                # Draw card background
+                card_rect = (x_offset, y_pos, self.column_width - 5, self.card_height - 10)
+                pygame.draw.rect(panel, card_color, card_rect)
+                
+                if wrestler:
+                    # Draw name
+                    name = self.title_font.render(wrestler.name, True, self.BLACK)
+                    panel.blit(name, (x_offset + 7, y_pos + 7))
+                    name = self.title_font.render(wrestler.name, True, text_color)
+                    panel.blit(name, (x_offset + 5, y_pos + 5))
+                    
+                    # --- Change 1: Add "HP" label before health bar ---
+                    hp_label = self.font.render("HP", True, text_color)
+                    panel.blit(hp_label, (x_offset + 5, y_pos + 32))
+                    
+                    # Health bar and value (shifted right to accommodate "HP" label)
+                    health_ratio = wrestler.health / wrestler.max_health if is_active or is_eliminated else 1.0
+                    health_value = wrestler.health if is_active or is_eliminated else wrestler.max_health
+                    health_bar_width = (self.column_width - 70)  # Adjusted from -50 to -70 to make space for "HP"
+                    health_bar_rect = (x_offset + 25, y_pos + 35, health_bar_width, 10)  # Shifted from x_offset + 5 to x_offset + 25
+                    pygame.draw.rect(panel, self.BLACK, health_bar_rect, 3)
+                    pygame.draw.rect(panel, (100, 100, 100), health_bar_rect)
+                    pygame.draw.rect(panel, self.GREEN if health_ratio > 0.5 else self.YELLOW if health_ratio > 0.25 else self.RED,
+                                    (x_offset + 25, y_pos + 35, int(health_bar_width * health_ratio), 10))
+                    health_text = self.font.render(f"{health_value:.1f}", True, text_color)
+                    panel.blit(health_text, (x_offset + 25 + health_bar_width + 5, y_pos + 32))  # Adjusted position
+                    
+                    # --- Change 2: Add "STA" label before stamina bar ---
+                    sta_label = self.font.render("ST", True, text_color)
+                    panel.blit(sta_label, (x_offset + 5, y_pos + 52))
+                    
+                    # Stamina bar and value (shifted right to accommodate "STA" label)
+                    stamina_ratio = wrestler.stamina / wrestler.max_stamina if is_active else 1.0
+                    stamina_value = wrestler.stamina if is_active else wrestler.max_stamina
+                    stamina_bar_rect = (x_offset + 25, y_pos + 55, health_bar_width, 10)  # Shifted from x_offset + 5 to x_offset + 25
+                    pygame.draw.rect(panel, self.BLACK, stamina_bar_rect, 3)
+                    pygame.draw.rect(panel, (100, 100, 100), stamina_bar_rect)
+                    pygame.draw.rect(panel, self.CYAN, (x_offset + 25, y_pos + 55, int(health_bar_width * stamina_ratio), 10))
+                    stamina_text = self.font.render(f"{stamina_value:.0f}", True, text_color)
+                    panel.blit(stamina_text, (x_offset + 25 + health_bar_width + 5, y_pos + 52))  # Adjusted position
+                
+                y_pos += self.card_height
+        
+        # Blit the panel onto the screen
+        panel_start_x = int(self.ring_rect.right + 10)  # Start 10 pixels after the ring's right edge
+        self.screen.blit(panel, (panel_start_x, 10))
+        
+       
     def handle_events(self):
-        """Handle pygame events including scrolling."""
+        """Handle pygame events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            if event.type == pygame.MOUSEWHEEL:
-                # Calculate total content height for scrolling
-                content_height = (40 + len(self.stats["current_wrestlers"]) * 110 +
-                                 (30 + len(self.stats["eliminated"]) * 25 if self.stats["eliminated"] else 0))
-                if content_height > self.panel_height:
-                    self.scroll_y -= event.y * self.scroll_speed  # event.y is 1 for scroll up, -1 for scroll down
-                    self.scroll_y = max(0, min(self.scroll_y, content_height - self.panel_height))  # Clamp scroll position
         return True
+    
 
     def render(self, wrestlers, initiator=None, responder=None):
         """Render the current state of the match.
@@ -281,6 +283,8 @@ class WrestlingViz:
         self.initiator = initiator
         self.responder = responder
         self.stats["current_wrestlers"] = wrestlers
+        if not self.stats["all_wrestlers"]:
+            self.stats["all_wrestlers"] = wrestlers[:10]  # Limit to 10 for display
         if not self.handle_events():
             return False
 
