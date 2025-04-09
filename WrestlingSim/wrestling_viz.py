@@ -15,6 +15,7 @@ class WrestlingViz:
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("Arial", 16)
         self.title_font = pygame.font.SysFont("Arial", 24, bold=True)
+        self.stats_font = pygame.font.SysFont("Arial", 15, bold=True)
         
         # Color definitions
         self.WHITE = (255, 255, 255)
@@ -215,6 +216,9 @@ class WrestlingViz:
                 # Draw card background
                 card_rect = (x_offset, y_pos, self.column_width - 5, self.card_height - 10)
                 pygame.draw.rect(panel, card_color, card_rect)
+
+                
+                # title_text = title_font.render("ROYAL RUMBLE WRESTLING SIMULATION", True, self.WHITE)
                 
                 if wrestler:
                     # Draw name
@@ -223,35 +227,48 @@ class WrestlingViz:
                     name = self.title_font.render(wrestler.name, True, text_color)
                     panel.blit(name, (x_offset + 5, y_pos + 5))
                     
-                    # --- Change 1: Add "HP" label before health bar ---
-                    hp_label = self.font.render("HP", True, text_color)
+                    # "HP" label before health bar ---
+                    hp_label = self.stats_font.render("HP", True, text_color)
                     panel.blit(hp_label, (x_offset + 5, y_pos + 32))
                     
                     # Health bar and value (shifted right to accommodate "HP" label)
                     health_ratio = wrestler.health / wrestler.max_health if is_active or is_eliminated else 1.0
                     health_value = wrestler.health if is_active or is_eliminated else wrestler.max_health
-                    health_bar_width = (self.column_width - 70)  # Adjusted from -50 to -70 to make space for "HP"
-                    health_bar_rect = (x_offset + 25, y_pos + 35, health_bar_width, 10)  # Shifted from x_offset + 5 to x_offset + 25
+                    health_bar_width = (self.column_width - 70)  
+                    health_bar_rect = (x_offset + 25, y_pos + 35, health_bar_width, 10)  
                     pygame.draw.rect(panel, self.BLACK, health_bar_rect, 3)
                     pygame.draw.rect(panel, (100, 100, 100), health_bar_rect)
                     pygame.draw.rect(panel, self.GREEN if health_ratio > 0.5 else self.YELLOW if health_ratio > 0.25 else self.RED,
                                     (x_offset + 25, y_pos + 35, int(health_bar_width * health_ratio), 10))
-                    health_text = self.font.render(f"{health_value:.1f}", True, text_color)
-                    panel.blit(health_text, (x_offset + 25 + health_bar_width + 5, y_pos + 32))  # Adjusted position
+                    health_text = self.stats_font.render(f"{health_value:.1f}", True, text_color)
+                    panel.blit(health_text, (x_offset + 25 + health_bar_width + 5, y_pos + 32))  
                     
-                    # --- Change 2: Add "STA" label before stamina bar ---
-                    sta_label = self.font.render("ST", True, text_color)
+                    # "ST" label before stamina bar ---
+                    sta_label = self.stats_font.render("ST", True, text_color)
                     panel.blit(sta_label, (x_offset + 5, y_pos + 52))
                     
                     # Stamina bar and value (shifted right to accommodate "STA" label)
                     stamina_ratio = wrestler.stamina / wrestler.max_stamina if is_active else 1.0
                     stamina_value = wrestler.stamina if is_active else wrestler.max_stamina
-                    stamina_bar_rect = (x_offset + 25, y_pos + 55, health_bar_width, 10)  # Shifted from x_offset + 5 to x_offset + 25
+                    stamina_bar_rect = (x_offset + 25, y_pos + 55, health_bar_width, 10)  
                     pygame.draw.rect(panel, self.BLACK, stamina_bar_rect, 3)
                     pygame.draw.rect(panel, (100, 100, 100), stamina_bar_rect)
                     pygame.draw.rect(panel, self.CYAN, (x_offset + 25, y_pos + 55, int(health_bar_width * stamina_ratio), 10))
-                    stamina_text = self.font.render(f"{stamina_value:.0f}", True, text_color)
-                    panel.blit(stamina_text, (x_offset + 25 + health_bar_width + 5, y_pos + 52))  # Adjusted position
+                    stamina_text = self.stats_font.render(f"{stamina_value:.0f}", True, text_color)
+                    panel.blit(stamina_text, (x_offset + 25 + health_bar_width + 5, y_pos + 52))  
+
+                    last_action = wrestler.last_action
+                    action_type = None
+                    if last_action == 0:
+                        action_type = "Punch"
+                    if last_action == 1:
+                        action_type = "Kick"
+                    if last_action == 3:
+                        action_type == "Signature"
+                    move_label = self.stats_font.render("MOVE = " if wrestler == self.initiator else "", True, text_color)
+                    panel.blit(move_label, (x_offset + 5, y_pos + 72))
+                    action_text = self.stats_font.render(f"{action_type}" if wrestler == self.initiator else "", True, text_color)
+                    panel.blit(action_text, (x_offset + 55, y_pos + 72))  
                 
                 y_pos += self.card_height
         
@@ -287,9 +304,19 @@ class WrestlingViz:
             self.stats["all_wrestlers"] = wrestlers[:10]  # Limit to 10 for display
         if not self.handle_events():
             return False
-
-        # Draw all components
+        
+        self.screen.fill((50, 50, 70))  # Dark blue background
         self.draw_ring()
+        # Draw the title at the top center
+        title_font = pygame.font.SysFont("Arial", 32, bold=True)
+        title_text = title_font.render("ROYAL RUMBLE WRESTLING SIMULATION", True, self.WHITE)
+        title_rect = title_text.get_rect(center=(self.ring_rect.centerx, 30))
+        background_rect = title_rect.inflate(20, 10)  
+        pygame.draw.rect(self.screen, self.BLACK, background_rect)  # Black background
+        pygame.draw.rect(self.screen, self.WHITE, background_rect, 2)  # White border
+        self.screen.blit(title_text, title_rect)
+
+        # Draw all components        
         for i, wrestler in enumerate(wrestlers):
             screen_pos = self.pos_to_screen(wrestler.get_qpos(), i == 0)
             self.draw_humanoid(wrestler, screen_pos, i == 0)
