@@ -194,7 +194,7 @@ class BattleRoyaleEnv:
             return None, None
 
         # Simulated annealing to select the initiator
-        max_iterations = 100  # Number of iterations for SA within this selection
+        max_iterations = 10  # Number of iterations for SA within this selection
         if self.current_initiator is None or self.current_initiator not in self.active_wrestlers:
             # Initialize the current initiator if not set or if it was eliminated
             self.current_initiator = random.choice(self.active_wrestlers)
