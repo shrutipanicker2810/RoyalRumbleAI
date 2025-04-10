@@ -26,7 +26,7 @@ class WrestlingAgent:
         action_probs = np.zeros(5)  # Initialize action probabilities
         
         if distance > 1.5:  # Far from opponent - recover stamina
-            action_probs[4] = 0.8  # High probability for no-op
+            action_probs[4] = 0  # No probability for no-op
             action_probs[0] = 0.1  # Small chance to punch
             action_probs[1] = 0.1  # Small chance to kick
         else:  # Close to opponent - attack
@@ -34,8 +34,8 @@ class WrestlingAgent:
             action_probs[0] = strength * 0.5  # Punch favors strength
             action_probs[1] = agility * 0.4    # Kick favors agility
             action_probs[3] = strength * 0.3   # Signature move favors strength
-            action_probs[4] = 0.2              # Small chance to do nothing
-            
+            action_probs[4] = 0              # Small chance to do nothing
+
         # Normalize probabilities and choose action
         action_probs /= action_probs.sum()
         return np.random.choice(5, p=action_probs)

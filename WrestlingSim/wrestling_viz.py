@@ -95,21 +95,21 @@ class WrestlingViz:
             pygame.draw.line(self.screen, color, body_bottom, (screen_pos[0] - leg_length, screen_pos[1] + leg_pos), line_thickness)
             pygame.draw.line(self.screen, color, body_bottom, (screen_pos[0] + leg_length, screen_pos[1] + leg_pos), line_thickness)
         
-        # Draw health bar above wrestler
-        health_ratio = wrestler.health / wrestler.max_health
-        bar_width = int(40 * player_scale)
-        bar_height = int(5 * player_scale)
-        bar_rect = (screen_pos[0] - bar_width // 2, screen_pos[1] - 40 * player_scale, bar_width, bar_height)
-        pygame.draw.rect(self.screen, self.BLACK, bar_rect, 2)
-        pygame.draw.rect(self.screen, (100, 100, 100), bar_rect)
-        pygame.draw.rect(self.screen, self.GREEN if health_ratio > 0.5 else self.YELLOW if health_ratio > 0.25 else self.RED,
-                         (screen_pos[0] - bar_width // 2, screen_pos[1] - 40 * player_scale, int(bar_width * health_ratio), bar_height))
+        # # Draw health bar above wrestler
+        # health_ratio = wrestler.health / wrestler.max_health
+        # bar_width = int(40 * player_scale)
+        # bar_height = int(5 * player_scale)
+        # bar_rect = (screen_pos[0] - bar_width // 2, screen_pos[1] - 40 * player_scale, bar_width, bar_height)
+        # pygame.draw.rect(self.screen, self.BLACK, bar_rect, 2)
+        # pygame.draw.rect(self.screen, (100, 100, 100), bar_rect)
+        # pygame.draw.rect(self.screen, self.GREEN if health_ratio > 0.5 else self.YELLOW if health_ratio > 0.25 else self.RED,
+        #                  (screen_pos[0] - bar_width // 2, screen_pos[1] - 40 * player_scale, int(bar_width * health_ratio), bar_height))
         
         # change tag background color for initiators and responders
         # Draw name tag
         name_font = pygame.font.SysFont("Arial", int(16 * player_scale))
         name_text = name_font.render(wrestler.name, True, self.WHITE)
-        name_rect = name_text.get_rect(center=(screen_pos[0], screen_pos[1] - 60 * player_scale))
+        name_rect = name_text.get_rect(center=(screen_pos[0], screen_pos[1] - 40 * player_scale)) # change from -40 to -60, if health bar needs to be included
         background_rect = name_rect.inflate(10 * player_scale, 6 * player_scale)
         pygame.draw.rect(self.screen, (50, 50, 50, 200), background_rect, border_radius=5)
         pygame.draw.rect(self.screen, self.CRIMSON if wrestler == self.initiator else self.BLUE if wrestler == self.responder else self.WHITE, background_rect, 2, border_radius=5)
@@ -187,7 +187,7 @@ class WrestlingViz:
         all_wrestlers = self.stats["all_wrestlers"]
         active_wrestlers = self.stats["current_wrestlers"]
         eliminated_wrestlers = self.stats["eliminated"]
-
+        
         for col in range(2):  # Two columns
             x_offset = 10 if col == 0 else self.column_width + 20  # Left or right column
             column_wrestlers = all_wrestlers[col * 5:(col + 1) * 5]  # First 5 or last 5
@@ -216,9 +216,6 @@ class WrestlingViz:
                 # Draw card background
                 card_rect = (x_offset, y_pos, self.column_width - 5, self.card_height - 10)
                 pygame.draw.rect(panel, card_color, card_rect)
-
-                
-                # title_text = title_font.render("ROYAL RUMBLE WRESTLING SIMULATION", True, self.WHITE)
                 
                 if wrestler:
                     # Draw name
@@ -264,12 +261,21 @@ class WrestlingViz:
                     if last_action == 1:
                         action_type = "Kick"
                     if last_action == 3:
-                        action_type == "Signature"
+                        action_type = "Signature"
+                    if last_action == 4:
+                        action_type = "No-op"
                     move_label = self.stats_font.render("MOVE = " if wrestler == self.initiator else "", True, text_color)
                     panel.blit(move_label, (x_offset + 5, y_pos + 72))
                     action_text = self.stats_font.render(f"{action_type}" if wrestler == self.initiator else "", True, text_color)
                     panel.blit(action_text, (x_offset + 55, y_pos + 72))  
                 
+                    if wrestler == self.initiator and action_type == "No-op" and self.responder:
+                        # Calculate the distance between initiator and responder
+                        initiator_pos = self.initiator.get_qpos()
+                        responder_pos = self.responder.get_qpos()
+                        distance = np.linalg.norm(initiator_pos - responder_pos)
+                        distance_text = self.stats_font.render(f"DIST: {distance:.1f}", True, text_color)
+                        panel.blit(distance_text, (x_offset + health_bar_width + 5, y_pos + 72))  
                 y_pos += self.card_height
         
         # Blit the panel onto the screen

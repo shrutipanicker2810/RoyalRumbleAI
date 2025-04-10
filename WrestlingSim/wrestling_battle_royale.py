@@ -18,7 +18,7 @@ class BattleRoyaleEnv:
     
     WIN_REWARD = 500.0
     HIT_REWARD = 10.0
-    MIN_SEPARATION = 0.5  # Minimum distance between wrestlers
+    MIN_SEPARATION = 2  # Minimum distance between wrestlers
 
     def __init__(self, ring_size=3.0, entry_interval=5):
         """Initialize the battle royale environment.
@@ -88,6 +88,8 @@ class BattleRoyaleEnv:
 
         if initiator and responder:
             action = actions.get(initiator.id, 4)  # Default to no-op if no action specified
+            if initiator.stamina <= 0:
+                action = 4
             attack_types = {0: "Punch", 1: "Kick", 3: "Signature", 4: "No-op"}
             attack_type = attack_types.get(action, "Unknown")
 
@@ -327,7 +329,7 @@ def run_battle_royale():
     
     running = True
     clock = pygame.time.Clock()
-    timestep_delay = 1000  # Delay between timesteps in ms
+    timestep_delay = 2000  # Delay between timesteps in ms
     
     while running:
         for event in pygame.event.get():

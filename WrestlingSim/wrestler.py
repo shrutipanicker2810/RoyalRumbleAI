@@ -67,7 +67,7 @@ class Wrestler:
         if action in [0, 1, 3]:  # Offensive actions
             # Deduct stamina based on action type
             stamina_cost = {0: 5, 1: 7, 3: 20}[action]
-            self.stamina = max(0, min(self.max_stamina, self.stamina - stamina_cost))
+            self.stamina = max(0, self.stamina - stamina_cost)
             # Move toward opponent
             new_pos = self_pos + direction * move_step
             self.set_xyz(np.array([new_pos[0], new_pos[1], 1.0]))
