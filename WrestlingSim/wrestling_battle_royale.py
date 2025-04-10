@@ -329,7 +329,7 @@ def run_battle_royale():
     
     running = True
     clock = pygame.time.Clock()
-    timestep_delay = 2000  # Delay between timesteps in ms
+    timestep_delay = 1000  # Delay between timesteps in ms
     
     while running:
         for event in pygame.event.get():

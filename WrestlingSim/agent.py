@@ -26,7 +26,7 @@ class WrestlingAgent:
         action_probs = np.zeros(5)  # Initialize action probabilities
         
         if distance > 1.5:  # Far from opponent - recover stamina
-            action_probs[4] = 0  # No probability for no-op
+            action_probs[4] = 0.8  # No probability for no-op
             action_probs[0] = 0.1  # Small chance to punch
             action_probs[1] = 0.1  # Small chance to kick
         else:  # Close to opponent - attack

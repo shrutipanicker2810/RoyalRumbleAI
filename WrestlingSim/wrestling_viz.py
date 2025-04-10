@@ -16,7 +16,9 @@ class WrestlingViz:
         self.font = pygame.font.SysFont("Arial", 16)
         self.title_font = pygame.font.SysFont("Arial", 24, bold=True)
         self.stats_font = pygame.font.SysFont("Arial", 15, bold=True)
-        
+        self.previous_health = {}
+        self.responder_health_loss = 0
+
         # Color definitions
         self.WHITE = (255, 255, 255)
         self.BLACK = (0, 0, 0)
@@ -268,8 +270,13 @@ class WrestlingViz:
                     panel.blit(move_label, (x_offset + 5, y_pos + 72))
                     action_text = self.stats_font.render(f"{action_type}" if wrestler == self.initiator else "", True, text_color)
                     panel.blit(action_text, (x_offset + 55, y_pos + 72))  
-                
-                    if wrestler == self.initiator and action_type == "No-op" and self.responder:
+
+                    # Draw health loss for the responder
+                    if wrestler == self.responder and self.responder_health_loss > 0:
+                        health_loss_text = self.stats_font.render(f"HP LOST: {self.responder_health_loss:.1f}", True, text_color)
+                        panel.blit(health_loss_text, (x_offset + 5, y_pos + 72))
+                    
+                    if wrestler == self.initiator and self.responder:
                         # Calculate the distance between initiator and responder
                         initiator_pos = self.initiator.get_qpos()
                         responder_pos = self.responder.get_qpos()
@@ -302,6 +309,14 @@ class WrestlingViz:
         Returns:
             bool: False if user requested quit, True otherwise
         """
+        self.responder_health_loss = 0
+        if responder:
+            responder_id = id(responder)
+            current_health = responder.health
+            previous_health = self.previous_health.get(responder_id, current_health)
+            self.responder_health_loss = max(0, previous_health - current_health)
+            self.previous_health[responder_id] = current_health
+
         # Update stats and handle events
         self.initiator = initiator
         self.responder = responder
